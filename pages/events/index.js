@@ -1,16 +1,31 @@
-import AllEvents from '../../src/components/events/events-page';
+import CatEvent from '../../../src/components/events/catEvent';
 
-const EventsPage = ({ data }) => {
-  return <AllEvents data={data} />;
-};
+const EventsCatPage = ({ data, pageName }) => <CatEvent data={data} pageName={pageName} />;
 
-export default EventsPage;
+export default EventsCatPage;
 
-export async function getStaticProps() {
+export async function getStaticPaths() {
   const { events_categories } = await import('/data/data.json');
+  const allPaths = events_categories.map((ev) => {
+    return {
+      params: {
+        cat: ev.id.toString(),
+      },
+    };
+  });
+  console.log(allPaths);
   return {
-    props: {
-      data: events_categories,
-    },
+    paths: allPaths,
+    fallback: false,
   };
+}
+
+export async function getStaticProps(context) {
+  console.log(context);
+  const id = context?.params.cat;
+  const { allEvents } = await import('/data/data.json');
+
+  const data = allEvents.filter((ev) => ev.city === id);
+
+  return { props: { data, pageName: id } };
 }
